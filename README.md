@@ -36,6 +36,8 @@ Install
 License
 -------
 
+[MIT License](./LICENSE)
+
 Author
 ------
 

@@ -19,14 +19,16 @@ Requirement
 Usage
 -----
 
+### Option
 
-| Option name                            | Default |
-|----------------------------------------|---------|
-|g:difflam_sign_insert_symbol            | `+`     |
-|g:difflam_sign_delete_first_line_symbol | `‾`     |
-|g:difflam_sign_delete_symbol            | `_`     |
-|g:difflam_sign_modify_symbol            | `!`     |
+Modify sign text for (insert/delete/modify)
 
+| Variable name                           | Default |
+|-----------------------------------------|---------|
+| g:difflam_sign_insert_symbol            | `+`     |
+| g:difflam_sign_delete_first_line_symbol | `‾`     |
+| g:difflam_sign_delete_symbol            | `_`     |
+| g:difflam_sign_modify_symbol            | `!`     |
 
 Install
 -------

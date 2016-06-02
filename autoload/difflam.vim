@@ -26,7 +26,11 @@ function! s:sign_diff(diff) abort "{{{
     return
   endif
   let per_diff_stats = s:process_diff(a:diff)
-  let [b:difflam.hunks, b:difflam.stats] = difflam#sign#sign_diff(b:difflam.bufnr, per_diff_stats)
+  let b:difflam.hunks = difflam#sign#sign_diff(b:difflam.bufnr, per_diff_stats)
+  let b:difflam.stats = [0, 0, 0]
+  for diff_stat in per_diff_stats
+    let [b:difflam.stats[0], b:difflam.stats[1], b:difflam.stats[2]] += [len(diff_stat.inserted), len(diff_stat.modified), len(diff_stat.deleted)]
+  endfor
 endfunction "}}}
 
 function! s:process_diff(diff) abort "{{{
@@ -57,6 +61,17 @@ function! s:process_diff(diff) abort "{{{
   return stats
 endfunction "}}}
 
+function! s:callback_on_close(channel) abort "{{{
+  let diff = []
+  while ch_status(a:channel) is# 'buffered'
+    let diff += [ch_read(a:channel)]
+  endwhile
+  call s:sign_diff(diff)
+
+  let job = ch_getjob(a:channel)
+  call filter(s:diff_jobs, 'v:val != job')
+endfunction "}}}
+
 
 " Interface {{{1
 
@@ -67,12 +82,12 @@ function! difflam#get_stats() abort
   return b:difflam.stats
 endfunction
 
-function! difflam#start(path) abort
-  let path = fnamemodify(a:path, ':p')
-
+function! difflam#start(bufnr) abort
   if exists('b:difflam') && !b:difflam.active
     return
   endif
+
+  let path = expand('#' . a:bufnr . ':p')
   let [type, dir] = s:detect(path)
   if empty(type)
     let b:difflam = {'active': 0}
@@ -82,16 +97,17 @@ function! difflam#start(path) abort
   let b:difflam = {
         \   'active': 1
         \ , 'type': type
-        \ , 'bufnr': bufnr('%')
+        \ , 'bufnr': a:bufnr
         \ , 'path': fnamemodify(path, ':p:gs?\\?/?')
         \ , 'dir': fnamemodify(dir, ':p:h:gs?\\?/?')
         \ , 'stats': [0, 0, 0]
         \ }
+
   if has('job') && has('patch-7.4.1828')
-    if exists('s:job') && job_status(s:job) == 'run'
-      call job_stop(s:job)
+    if has_key(s:diff_jobs, a:bufnr) && job_status(s:diff_jobs[a:bufnr]) == 'run'
+      call job_stop(s:diff_jobs[a:bufnr])
     endif
-    let s:job = job_start(difflam#{type}#diff(), {'close_cb': 'difflam#callback'})
+    let s:diff_jobs[a:bufnr] = job_start(difflam#{type}#diff(), {'close_cb': function('s:callback_on_close')})
   else
     let stmp = &shelltemp
     try
@@ -104,19 +120,10 @@ function! difflam#start(path) abort
   endif
 endfunction
 
-function! difflam#callback(channel) abort
-  let diff = []
-  while ch_status(a:channel) is# 'buffered'
-    let diff += [ch_read(a:channel)]
-  endwhile
-  call s:sign_diff(diff)
-endfunction
-
 function! difflam#next_hunk(count) abort
   if !exists('b:difflam')
     return
   endif
-
   call difflam#sign#next_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
 endfunction
 
@@ -124,13 +131,12 @@ function! difflam#prev_hunk(count) abort
   if !exists('b:difflam')
     return
   endif
-
   call difflam#sign#prev_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
 endfunction
 
 " Initialization {{{1
 
 let s:sign_cache = {}
-
+let s:diff_jobs = {}
 
 " 1}}}

@@ -3,13 +3,13 @@ scriptencoding utf-8
 
 
 " Internal {{{1
-function! s:unplace_sign(stats, line) abort "{{{
-  if has_key(a:stats, a:line)
-    execute 'sign unplace' a:stats[a:line].id
+function! s:unplace_sign(stats, lnum) abort "{{{
+  if has_key(a:stats, a:lnum)
+    execute 'sign unplace' a:stats[a:lnum].id
   endif
 endfunction "}}}
 
-function! s:next_id() abort "{{{
+function! s:sign_id() abort "{{{
   try
     return s:sign_id_top
   finally
@@ -24,7 +24,7 @@ function! s:place_sign(bufnr, signs, line, name) abort "{{{
     endif
     let id = a:signs[a:line].id
   else
-    let id = s:next_id()
+    let id = s:sign_id()
   endif
 
   execute printf('sign place %d line=%d name=%s buffer=%s',
@@ -55,9 +55,6 @@ function! s:extract_signs(bufnr) abort "{{{
     let name = matchstr(raw_line, 'name=\zs\w\+\ze')
 
     if name =~# '^Difflam'
-      if has_key(stats, lnum)
-        execute 'sign unplace' stats[lnum].id
-      endif
       let stats[lnum] = {'name': name, 'id': id}
     endif
   endfor
@@ -80,7 +77,6 @@ endfunction "}}}
 
 function! difflam#sign#sign_diff(bufnr, stats) abort
   let placed_signs = s:extract_signs(a:bufnr)
-  let [inserted, modified, deleted] = [0, 0, 0]
   let used_signs = {}
   let hunks = []
 
@@ -99,7 +95,6 @@ function! difflam#sign#sign_diff(bufnr, stats) abort
       let used_signs[lnum] = 1
     endfor
     if !empty(ids)
-      let [inserted, modified, deleted] += [len(stat.inserted), len(stat.modified), len(stat.deleted)]
       let lnums = stat.inserted + stat.deleted + stat.modified
       let hunks += [{
             \   'sign_id'  : ids[0]
@@ -109,7 +104,7 @@ function! difflam#sign#sign_diff(bufnr, stats) abort
   endfor
 
   call map(filter(keys(placed_signs), '!has_key(used_signs, v:val)'), 's:unplace_sign(placed_signs, v:val)')
-  return [hunks, [inserted, modified, deleted]]
+  return hunks
 endfunction
 
 function! difflam#sign#next_hunk(bufnr, hunks, count) abort
@@ -121,10 +116,10 @@ function! difflam#sign#next_hunk(bufnr, hunks, count) abort
   endif
 
   let hunk = hunks[len(hunks) >= a:count ? a:count - 1 : -1]
-  execute 'sign jump' hunk.id 'buffer=' . a:bufnr
+  execute 'sign jump' hunk.sign_id 'buffer=' . a:bufnr
 endfunction
 
-function! difflam#prev_hunk(bufnr, hunks, count) abort
+function! difflam#sign#prev_hunk(bufnr, hunks, count) abort
   let lnum = line('.')
   let hunks = filter(copy(a:hunks), 'v:val.start < lnum')
 
@@ -132,23 +127,17 @@ function! difflam#prev_hunk(bufnr, hunks, count) abort
     return
   endif
 
-  let hunk = hunks[len(hunks) >= a:count ? 0 - a:count] : 0]
-  execute 'sign jump' hunk.id 'buffer=' . a:bufnr
+  let hunk = hunks[len(hunks) >= a:count ? 0 - a:count : 0]
+  execute 'sign jump' hunk.sign_id 'buffer=' . a:bufnr
 endfunction
 
 " Initialization {{{1
 
 let s:sign_id_top = 0xBEEF
 
-if !hlexists('DifflamSignInsert')
-  highlight default link DifflamSignInserted DiffAdd
-endif
-if !hlexists('DifflamSignDelete')
-  highlight default link DifflamSignDelete DiffDelete
-endif
-if !hlexists('DifflamSignModify')
-  highlight default link DifflamSignModify DiffChange
-endif
+highlight default link DifflamSignInserted DiffAdd
+highlight default link DifflamSignDelete DiffDelete
+highlight default link DifflamSignModify DiffChange
 
 call s:define_sign_text()
 

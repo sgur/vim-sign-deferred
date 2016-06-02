@@ -14,7 +14,7 @@ set cpo&vim
 
 augroup plugin-difflam
   autocmd!
-  autocmd BufRead,BufWritePost * call difflam#start(expand('<afile>', 1))
+  autocmd BufReadPre,BufWritePost * call difflam#start(expand('<abuf>', 1))
 augroup END
 
 

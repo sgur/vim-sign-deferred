@@ -21,7 +21,7 @@ Usage
 
 ### Option
 
-Modify sign text for (insert/delete/modify)
+#### Customize sign text
 
 | Variable name                           | Default |
 |-----------------------------------------|---------|
@@ -29,6 +29,27 @@ Modify sign text for (insert/delete/modify)
 | g:difflam_sign_delete_first_line_symbol | `‾`     |
 | g:difflam_sign_delete_symbol            | `_`     |
 | g:difflam_sign_modify_symbol            | `!`     |
+
+```vim
+let g:difflam_sign_insert_symbol='⇒'
+let g:difflam_sign_delete_first_line_symbol='⇐'
+let g:difflam_sign_delete_symbol='⇐'
+let g:difflam_sign_modify_symbol='⇔'
+```
+
+### Customize highlight group
+
+| Highlight group name | Default                 |
+|----------------------|-------------------------|
+| DifflamSignInserted  | linking to `DiffAdd`    |
+| DifflamSignDelete    | Linking to `DiffDelete` |
+| DifflamSignModify    | Linking to `DiffChange` |
+
+```vim
+highlight DifflamSignInserted guifg=green
+highlight DifflamSignDelete guifg=red
+highlight DifflamSignModify guifg=orange
+```
 
 Install
 -------

@@ -25,8 +25,8 @@ function! s:sign_diff(diff) abort "{{{
     echoerr 'Diff mismatch occurred:' expand('%')
     return
   endif
-  let stats = s:process_diff(a:diff)
-  call difflam#sign#sign_diff(stats)
+  let per_diff_stats = s:process_diff(a:diff)
+  let [b:difflam.hunks, b:difflam.stats] = difflam#sign#sign_diff(b:difflam.bufnr, per_diff_stats)
 endfunction "}}}
 
 function! s:process_diff(diff) abort "{{{
@@ -117,16 +117,7 @@ function! difflam#next_hunk(count) abort
     return
   endif
 
-  let lnum = line('.')
-  let hunks = filter(copy(b:difflam.hunks), 'v:val.start > lnum')
-
-  let hunk = len(hunks) >= a:count
-        \ ? hunks[a:count-1]
-        \ : get(hunks, -1, {})
-
-  if !empty(hunk)
-    call difflam#sign#jump(hunk.id)
-  endif
+  call difflam#sign#next_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
 endfunction
 
 function! difflam#prev_hunk(count) abort
@@ -134,18 +125,8 @@ function! difflam#prev_hunk(count) abort
     return
   endif
 
-  let lnum = line('.')
-  let hunks = filter(copy(b:difflam.hunks), 'v:val.start < lnum')
-
-  let hunk = len(hunks) >= a:count
-        \ ? hunks[0 - a:count]
-        \ : get(hunks, 0, {})
-
-  if !empty(hunk)
-    call difflam#sign#jump(hunk.id)
-  endif
+  call difflam#sign#prev_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
 endfunction
-
 
 " Initialization {{{1
 

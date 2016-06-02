@@ -1,7 +1,7 @@
 " difflam
-" Version: 0.0.1
-" Author: 
-" License: 
+" Version: 0.1.0
+" Author: sgur
+" License: MIT License
 
 if exists('g:loaded_difflam')
   finish

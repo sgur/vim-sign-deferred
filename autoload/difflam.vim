@@ -21,6 +21,7 @@ function! s:find_repotype(dir) "{{{
 endfunction "}}}
 
 function! s:sign_diff(diff) abort "{{{
+  if !exists('b:difflam') | return | endif
   if b:difflam.bufnr != bufnr('%') || b:difflam.path != expand('%:p:gs?\\?/?')
     echoerr 'Diff mismatch occurred:' expand('%')
     return

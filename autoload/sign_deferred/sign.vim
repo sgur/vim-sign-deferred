@@ -54,7 +54,7 @@ function! s:extract_signs(bufnr) abort "{{{
     let id = str2nr(matchstr(raw_line, 'id=\zs\d\+\ze'))
     let name = matchstr(raw_line, 'name=\zs\w\+\ze')
 
-    if name =~# '^Difflam'
+    if name =~# '^SignDeferred'
       let stats[lnum] = {'name': name, 'id': id}
     endif
   endfor
@@ -63,10 +63,10 @@ endfunction "}}}
 
 function! s:define_sign_text() abort "{{{
   for [name, hlgroup, text] in [
-        \   ['DifflamInserted', 'DifflamSignInserted', get(g:, 'difflam_sign_insert_symbol', '+')]
-        \ , ['DifflamDeleteFirstLine', 'DifflamSignDelete', get(g:, 'difflam_sign_delete_first_line_symbol', '‾')]
-        \ , ['DifflamDelete', 'DifflamSignDelete', get(g:, 'difflam_sign_delete_symbol', '_')]
-        \ , ['DifflamModify', 'DifflamSignModify', get(g:, 'difflam_sign_modify_symbol', '!')]
+        \   ['SignDeferredInserted', 'SignDeferredInserted', get(g:, 'sign_deferred_insert_symbol', '+')]
+        \ , ['SignDeferredDeleteFirstLine', 'SignDeferredDelete', get(g:, 'sign_deferred_delete_first_line_symbol', '‾')]
+        \ , ['SignDeferredDelete', 'SignDeferredDelete', get(g:, 'sign_deferred_delete_symbol', '_')]
+        \ , ['SignDeferredModify', 'SignDeferredModify', get(g:, 'sign_deferred_modify_symbol', '!')]
         \ ]
     execute printf('sign define %s text=%s texthl=%s', name, text, hlgroup)
   endfor
@@ -75,7 +75,7 @@ endfunction "}}}
 
 " Interface {{{1
 
-function! difflam#sign#sign_diff(bufnr, stats) abort
+function! sign_deferred#sign#sign_diff(bufnr, stats) abort
   let placed_signs = s:extract_signs(a:bufnr)
   let used_signs = {}
   let hunks = []
@@ -83,15 +83,15 @@ function! difflam#sign#sign_diff(bufnr, stats) abort
   for stat in a:stats
     let ids = []
     for lnum in stat.inserted
-      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, 'DifflamInserted')]
+      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, 'SignDeferredInserted')]
       let used_signs[lnum] = 1
     endfor
     for lnum in stat.deleted
-      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, (lnum == 1 ? 'DifflamDeleteFirstLine' : 'DifflamDelete'))]
+      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, (lnum == 1 ? 'SignDeferredDeleteFirstLine' : 'SignDeferredDelete'))]
       let used_signs[lnum] = 1
     endfor
     for lnum in stat.modified
-      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, 'DifflamModify')]
+      let ids += [s:place_sign(a:bufnr, placed_signs, lnum, 'SignDeferredModify')]
       let used_signs[lnum] = 1
     endfor
     if !empty(ids)
@@ -107,7 +107,7 @@ function! difflam#sign#sign_diff(bufnr, stats) abort
   return hunks
 endfunction
 
-function! difflam#sign#next_hunk(bufnr, hunks, count) abort
+function! sign_deferred#sign#next_hunk(bufnr, hunks, count) abort
   let lnum = line('.')
   let hunks = filter(copy(a:hunks), 'v:val.start > lnum')
 
@@ -119,7 +119,7 @@ function! difflam#sign#next_hunk(bufnr, hunks, count) abort
   execute 'sign jump' hunk.sign_id 'buffer=' . a:bufnr
 endfunction
 
-function! difflam#sign#prev_hunk(bufnr, hunks, count) abort
+function! sign_deferred#sign#prev_hunk(bufnr, hunks, count) abort
   let lnum = line('.')
   let hunks = filter(copy(a:hunks), 'v:val.start < lnum')
 
@@ -135,9 +135,9 @@ endfunction
 
 let s:sign_id_top = 0xBEEF
 
-highlight default link DifflamSignInserted DiffAdd
-highlight default link DifflamSignDelete DiffDelete
-highlight default link DifflamSignModify DiffChange
+highlight default link SignDeferredInserted DiffAdd
+highlight default link SignDeferredDelete DiffDelete
+highlight default link SignDeferredModify DiffChange
 
 call s:define_sign_text()
 

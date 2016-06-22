@@ -1,4 +1,4 @@
-vim-difflam
+vim-sign-deferred
 ===========
 
 Adding signs asynchronously on the SignColumn area which mark changed from the repository.
@@ -25,30 +25,30 @@ Usage
 
 | Variable name                           | Default |
 |-----------------------------------------|---------|
-| g:difflam_sign_insert_symbol            | `+`     |
-| g:difflam_sign_delete_first_line_symbol | `‾`     |
-| g:difflam_sign_delete_symbol            | `_`     |
-| g:difflam_sign_modify_symbol            | `!`     |
+| g:sign_deferred_insert_symbol            | `+`     |
+| g:sign_deferred_delete_first_line_symbol | `‾`     |
+| g:sign_deferred_delete_symbol            | `_`     |
+| g:sign_deferred_modify_symbol            | `!`     |
 
 ```vim
-let g:difflam_sign_insert_symbol='⇒'
-let g:difflam_sign_delete_first_line_symbol='⇐'
-let g:difflam_sign_delete_symbol='⇐'
-let g:difflam_sign_modify_symbol='⇔'
+let g:sign_deferred_insert_symbol='⇒'
+let g:sign_deferred_delete_first_line_symbol='⇐'
+let g:sign_deferred_delete_symbol='⇐'
+let g:sign_deferred_modify_symbol='⇔'
 ```
 
 ### Customize highlight group
 
-| Highlight group name | Default                 |
-|----------------------|-------------------------|
-| DifflamSignInserted  | linking to `DiffAdd`    |
-| DifflamSignDelete    | Linking to `DiffDelete` |
-| DifflamSignModify    | Linking to `DiffChange` |
+| Highlight group name     | Default                 |
+|--------------------------|-------------------------|
+| SignDeferredInserted | linking to `DiffAdd`    |
+| SignDeferredDelete   | Linking to `DiffDelete` |
+| SignDeferredModify   | Linking to `DiffChange` |
 
 ```vim
-highlight DifflamSignInserted guifg=green
-highlight DifflamSignDelete guifg=red
-highlight DifflamSignModify guifg=orange
+highlight SignDeferredInserted guifg=green
+highlight SignDeferredDelete guifg=red
+highlight SignDeferredModify guifg=orange
 ```
 
 Install

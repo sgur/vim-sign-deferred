@@ -7,12 +7,12 @@ scriptencoding utf-8
 
 " Interface {{{1
 
-function! difflam#git#diff() abort
-  let work_tree = fnamemodify(b:difflam.dir, ':h')
+function! sign_deferred#git#diff() abort
+  let work_tree = fnamemodify(b:sign_deferred.dir, ':h')
   return printf('git --git-dir="%s" --work-tree="%s" diff --no-color --no-ext-diff -U0 -- %s'
-        \ , b:difflam.dir
+        \ , b:sign_deferred.dir
         \ , work_tree
-        \ , b:difflam.path[len(work_tree)+1:])
+        \ , b:sign_deferred.path[len(work_tree)+1:])
 endfunction
 
 

@@ -21,16 +21,16 @@ function! s:find_repotype(dir) "{{{
 endfunction "}}}
 
 function! s:sign_diff(diff) abort "{{{
-  if !exists('b:difflam') | return | endif
-  if b:difflam.bufnr != bufnr('%') || b:difflam.path != expand('%:p:gs?\\?/?')
+  if !exists('b:sign_deferred') | return | endif
+  if b:sign_deferred.bufnr != bufnr('%') || b:sign_deferred.path != expand('%:p:gs?\\?/?')
     echoerr 'Diff mismatch occurred:' expand('%')
     return
   endif
   let per_diff_stats = s:process_diff(a:diff)
-  let b:difflam.hunks = difflam#sign#sign_diff(b:difflam.bufnr, per_diff_stats)
-  let b:difflam.stats = [0, 0, 0]
+  let b:sign_deferred.hunks = sign_deferred#sign#sign_diff(b:sign_deferred.bufnr, per_diff_stats)
+  let b:sign_deferred.stats = [0, 0, 0]
   for diff_stat in per_diff_stats
-    let [b:difflam.stats[0], b:difflam.stats[1], b:difflam.stats[2]] += [len(diff_stat.inserted), len(diff_stat.modified), len(diff_stat.deleted)]
+    let [b:sign_deferred.stats[0], b:sign_deferred.stats[1], b:sign_deferred.stats[2]] += [len(diff_stat.inserted), len(diff_stat.modified), len(diff_stat.deleted)]
   endfor
 endfunction "}}}
 
@@ -76,26 +76,26 @@ endfunction "}}}
 
 " Interface {{{1
 
-function! difflam#get_stats() abort
-  if !exists('b:difflam') || !has_key(b:difflam, 'stats')
+function! sign_deferred#get_stats() abort
+  if !exists('b:sign_deferred') || !has_key(b:sign_deferred, 'stats')
     return [-1, -1, -1]
   endif
-  return b:difflam.stats
+  return b:sign_deferred.stats
 endfunction
 
-function! difflam#start(bufnr) abort
-  if exists('b:difflam') && !b:difflam.active
+function! sign_deferred#start(bufnr) abort
+  if exists('b:sign_deferred') && !b:sign_deferred.active
     return
   endif
 
   let path = expand('#' . a:bufnr . ':p')
   let [type, dir] = s:detect(path)
   if empty(type)
-    let b:difflam = {'active': 0}
+    let b:sign_deferred = {'active': 0}
     return
   endif
 
-  let b:difflam = {
+  let b:sign_deferred = {
         \   'active': 1
         \ , 'type': type
         \ , 'bufnr': a:bufnr
@@ -108,12 +108,12 @@ function! difflam#start(bufnr) abort
     if has_key(s:diff_jobs, a:bufnr) && job_status(s:diff_jobs[a:bufnr]) == 'run'
       call job_stop(s:diff_jobs[a:bufnr])
     endif
-    let s:diff_jobs[a:bufnr] = job_start(difflam#{type}#diff(), {'close_cb': function('s:callback_on_close')})
+    let s:diff_jobs[a:bufnr] = job_start(sign_deferred#{type}#diff(), {'close_cb': function('s:callback_on_close')})
   else
     let stmp = &shelltemp
     try
       let &shelltemp = !(has('win32') && has("filterpipe")) && &shelltemp
-      let diff = systemlist(difflam#{type}#diff())
+      let diff = systemlist(sign_deferred#{type}#diff())
       call s:sign_diff(diff)
     finally
       let &shelltemp = stmp
@@ -121,18 +121,18 @@ function! difflam#start(bufnr) abort
   endif
 endfunction
 
-function! difflam#next_hunk(count) abort
-  if !exists('b:difflam')
+function! sign_deferred#next_hunk(count) abort
+  if !exists('b:sign_deferred')
     return
   endif
-  call difflam#sign#next_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
+  call sign_deferred#sign#next_hunk(b:sign_deferred.bufnr, b:sign_deferred.hunks, a:count)
 endfunction
 
-function! difflam#prev_hunk(count) abort
-  if !exists('b:difflam')
+function! sign_deferred#prev_hunk(count) abort
+  if !exists('b:sign_deferred')
     return
   endif
-  call difflam#sign#prev_hunk(b:difflam.bufnr, b:difflam.hunks, a:count)
+  call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, b:sign_deferred.hunks, a:count)
 endfunction
 
 " Initialization {{{1

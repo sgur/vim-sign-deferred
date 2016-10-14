@@ -23,7 +23,7 @@ endfunction "}}}
 function! s:sign_diff(diff) abort "{{{
   if !exists('b:sign_deferred') | return | endif
   if b:sign_deferred.bufnr != bufnr('%') || b:sign_deferred.path != expand('%:p:gs?\\?/?')
-    echoerr 'Diff mismatch occurred:' expand('%')
+    echoerr 'vim-sign-deferred: Diff mismatch occurred:' expand('%')
     return
   endif
   let per_diff_stats = s:process_diff(a:diff)
@@ -62,12 +62,24 @@ function! s:process_diff(diff) abort "{{{
   return stats
 endfunction "}}}
 
+function! s:callback_on_error(channel, message) abort "{{{
+  echoerr 'vim-sign-deferred: Job error callback invoked'
+  echohl ErrorMsg
+  echomsg a:message
+  for [k, v] in items(ch_info(a:channel))
+    echomsg k ':' v
+  endfor
+  echohl NONE
+endfunction
+
 function! s:callback_on_close(channel) abort "{{{
   let diff = []
   while ch_status(a:channel) is# 'buffered'
     let diff += [ch_read(a:channel)]
   endwhile
-  call s:sign_diff(diff)
+  if !empty(diff)
+    call s:sign_diff(diff)
+  endif
 
   let job = ch_getjob(a:channel)
   call filter(s:diff_jobs, 'v:val != job')
@@ -108,7 +120,7 @@ function! sign_deferred#start(bufnr) abort
     if has_key(s:diff_jobs, a:bufnr) && job_status(s:diff_jobs[a:bufnr]) == 'run'
       call job_stop(s:diff_jobs[a:bufnr])
     endif
-    let s:diff_jobs[a:bufnr] = job_start(sign_deferred#{type}#diff(), {'close_cb': function('s:callback_on_close')})
+    let s:diff_jobs[a:bufnr] = job_start(sign_deferred#{type}#diff(), {'close_cb': function('s:callback_on_close'), 'err_cb': function('s:callback_on_error')})
   else
     let stmp = &shelltemp
     try

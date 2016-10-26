@@ -21,7 +21,7 @@ function! s:find_repotype(dir) "{{{
 endfunction "}}}
 
 function! s:sign_diff(diff) abort "{{{
-  if !exists('b:sign_deferred') | return | endif
+  if !exists('b:sign_deferred') || !get(b:sign_deferred, 'active', 0) | return | endif
   if b:sign_deferred.bufnr != bufnr('%') || b:sign_deferred.path != expand('%:p:gs?\\?/?')
     echoerr 'vim-sign-deferred: Diff mismatch occurred:' expand('%')
     return

@@ -70,7 +70,7 @@ function! s:callback_on_error(channel, message) abort "{{{
     echomsg k ':' v
   endfor
   echohl NONE
-endfunction
+endfunction "}}}
 
 function! s:callback_on_close(channel) abort "{{{
   let diff = []
@@ -137,14 +137,14 @@ function! sign_deferred#next_hunk(count) abort
   if !exists('b:sign_deferred')
     return
   endif
-  call sign_deferred#sign#next_hunk(b:sign_deferred.bufnr, b:sign_deferred.hunks, a:count)
+  call sign_deferred#sign#next_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks', []), a:count)
 endfunction
 
 function! sign_deferred#prev_hunk(count) abort
   if !exists('b:sign_deferred')
     return
   endif
-  call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, b:sign_deferred.hunks, a:count)
+  call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks' []), a:count)
 endfunction
 
 " Initialization {{{1

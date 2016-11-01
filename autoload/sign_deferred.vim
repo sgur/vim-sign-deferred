@@ -77,9 +77,7 @@ function! s:callback_on_close(channel) abort "{{{
   while ch_status(a:channel) is# 'buffered'
     let diff += [ch_read(a:channel)]
   endwhile
-  if !empty(diff)
-    call s:sign_diff(diff)
-  endif
+  call s:sign_diff(diff)
 
   let job = ch_getjob(a:channel)
   call filter(s:diff_jobs, 'v:val != job')

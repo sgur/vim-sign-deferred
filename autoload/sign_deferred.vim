@@ -21,7 +21,7 @@ function! s:find_repotype(dir) abort "{{{
 endfunction "}}}
 
 function! s:sign_diff(diff) abort "{{{
-  if !exists('b:sign_deferred') || !get(b:sign_deferred, 'active', 0) | return | endif
+  if !exists('b:sign_deferred') | return | endif
   if b:sign_deferred.bufnr != bufnr('%') || b:sign_deferred.path != expand('%:p:gs?\\?/?')
     echoerr 'vim-sign-deferred: Diff mismatch occurred:' expand('%')
     return
@@ -93,6 +93,22 @@ function! sign_deferred#get_stats() abort
   return b:sign_deferred.stats
 endfunction
 
+function! sign_deferred#enable() abort
+  if exists('b:sign_deferred') && b:sign_deferred.active
+    return
+  endif
+  let b:sign_deferred.active = 1
+  call sign_deferred#start(bufnr('%'))
+endfunction
+
+function! sign_deferred#disable() abort
+  if !exists('b:sign_deferred')
+    return
+  endif
+  let b:sign_deferred.active = 0
+  call sign_deferred#sign#reset(bufnr('%'))
+endfunction
+
 function! sign_deferred#start(bufnr) abort
   if exists('b:sign_deferred') && !b:sign_deferred.active
     return
@@ -101,7 +117,7 @@ function! sign_deferred#start(bufnr) abort
   let path = expand('#' . a:bufnr . ':p')
   let [type, dir] = s:detect(path)
   if empty(type)
-    let b:sign_deferred = {'active': 0}
+    unlet! b:sign_deferred
     return
   endif
 
@@ -132,14 +148,14 @@ function! sign_deferred#start(bufnr) abort
 endfunction
 
 function! sign_deferred#next_hunk(count) abort
-  if !exists('b:sign_deferred')
+  if !exists('b:sign_deferred') || !b:sign_deferred.active
     return
   endif
   call sign_deferred#sign#next_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks', []), a:count)
 endfunction
 
 function! sign_deferred#prev_hunk(count) abort
-  if !exists('b:sign_deferred')
+  if !exists('b:sign_deferred') || !b:sign_deferred.active
     return
   endif
   call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks', []), a:count)

@@ -75,6 +75,11 @@ endfunction "}}}
 
 " Interface {{{1
 
+function! sign_deferred#sign#reset(bufnr) abort
+  let placed_signs = s:extract_signs(a:bufnr)
+  call map(keys(placed_signs), 's:unplace_sign(placed_signs, v:val)')
+endfunction
+
 function! sign_deferred#sign#sign_diff(bufnr, stats) abort
   let placed_signs = s:extract_signs(a:bufnr)
   let used_signs = {}

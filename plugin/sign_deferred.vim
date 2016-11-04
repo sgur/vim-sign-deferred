@@ -18,12 +18,12 @@ augroup plugin-sign-deferred
 augroup END
 
 
-if empty(maparg(']c', 'n'))
-  nmap ]c <plug>(sign-deferred-next-hunk)
-endif
-if empty(maparg('[c', 'n'))
-  nmap [c <plug>(sign-deferred-prev-hunk)
-endif
+command! SignDeferredEnable  call sign_deferred#enable()
+command! SignDeferredDisable  call sign_deferred#disable()
+
+
+" nnoremap <silent> <Plug>(sign-deferred-next-hunk)  :<C-u>call sign_deferred#next_hunk(v:count1)<CR>
+" nnoremap <silent> <Plug>(sign-deferred-prev-hunk)  :<C-u>call sign_deferred#prev_hunk(v:count1)<CR>
 
 
 nnoremap <silent> <expr> <plug>(sign-deferred-next-hunk)
@@ -32,8 +32,12 @@ nnoremap <silent> <expr> <plug>(sign-deferred-prev-hunk)
       \ &diff ? '[c' : ":\<C-u>call sign_deferred#prev_hunk(v:count1)\<CR>"
 
 
-nnoremap <silent> <Plug>(sign-deferred-next-hunk)  :<C-u>call sign_deferred#next_hunk(v:count1)<CR>
-nnoremap <silent> <Plug>(sign-deferred-prev-hunk)  :<C-u>call sign_deferred#prev_hunk(v:count1)<CR>
+if empty(maparg(']c', 'n'))
+  nmap ]c <plug>(sign-deferred-next-hunk)
+endif
+if empty(maparg('[c', 'n'))
+  nmap [c <plug>(sign-deferred-prev-hunk)
+endif
 
 
 let &cpo = s:save_cpo

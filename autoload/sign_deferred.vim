@@ -142,7 +142,7 @@ function! sign_deferred#prev_hunk(count) abort
   if !exists('b:sign_deferred')
     return
   endif
-  call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks' []), a:count)
+  call sign_deferred#sign#prev_hunk(b:sign_deferred.bufnr, get(b:sign_deferred, 'hunks', []), a:count)
 endfunction
 
 " Initialization {{{1

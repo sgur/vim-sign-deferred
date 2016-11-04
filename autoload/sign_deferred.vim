@@ -8,7 +8,7 @@ function! s:detect(path) abort "{{{
   return s:find_repotype(fnamemodify(a:path, ':h'))
 endfunction "}}}
 
-function! s:find_repotype(dir) "{{{
+function! s:find_repotype(dir) abort "{{{
   let parent = fnamemodify(a:dir, ':h')
   if a:dir == parent
     return ['', '']
@@ -37,7 +37,7 @@ endfunction "}}}
 function! s:process_diff(diff) abort "{{{
   let stats = []
   let hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
-  for line in filter(a:diff, 'v:val =~ "^@@ "')
+  for line in filter(a:diff, 'v:val =~# "^@@ "')
     let inserted = []
     let modified = []
     let deleted = []
@@ -115,7 +115,7 @@ function! sign_deferred#start(bufnr) abort
         \ }
 
   if has('job') && has('patch-7.4.1828')
-    if has_key(s:diff_jobs, a:bufnr) && job_status(s:diff_jobs[a:bufnr]) == 'run'
+    if has_key(s:diff_jobs, a:bufnr) && job_status(s:diff_jobs[a:bufnr]) ==# 'run'
       call job_stop(s:diff_jobs[a:bufnr])
     endif
     let s:diff_jobs[a:bufnr] = job_start(sign_deferred#{type}#diff(), {'close_cb': function('s:callback_on_close'), 'err_cb': function('s:callback_on_error')})

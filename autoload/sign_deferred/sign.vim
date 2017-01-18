@@ -35,13 +35,11 @@ endfunction "}}}
 function! s:raw_sign_list(bufnr) abort "{{{
   let lang = v:lang
   try
-    language message C
-    redir => raw_signs
-    silent! execute 'sign place buffer='. a:bufnr
-    redir END
+    language messages C
+    let raw_signs = execute('sign place buffer='. a:bufnr)
     return split(raw_signs, "\n")[2:]
   finally
-    silent! execute 'language message' lang
+    silent! execute 'language messages' lang
   endtry
   return []
 endfunction "}}}
@@ -50,9 +48,15 @@ function! s:extract_signs(bufnr) abort "{{{
   let stats = {}
 
   for raw_line in s:raw_sign_list(a:bufnr)
-    let lnum = str2nr(matchstr(raw_line, 'line=\zs\d\+\ze'))
-    let id = str2nr(matchstr(raw_line, 'id=\zs\d\+\ze'))
-    let name = matchstr(raw_line, 'name=\zs\w\+\ze')
+    let matches = matchlist(raw_line, '\vline\=(\d+)\s+id\=(\d+)\s+name\=(\w+)')
+    if empty(matches)
+      echoerr 'vim-sign-deferred: Invalid sign place format:' raw_line
+      continue
+    endif
+
+    let lnum = str2nr(matches[1])
+    let id = str2nr(matches[2])
+    let name = matches[3]
 
     if name =~# '^SignDeferred'
       let stats[lnum] = {'name': name, 'id': id}

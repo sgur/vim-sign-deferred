@@ -13,7 +13,7 @@ function! s:find_repotype(dir) abort "{{{
   if a:dir == parent
     return ['', '']
   endif
-  let type = filter(map(['git'], '[v:val, printf("%s/.%s", a:dir, v:val)]'), 'isdirectory(v:val[1])')
+  let type = filter(map(['git'], '[v:val, printf(''%s/.%s'', a:dir, v:val)]'), 'isdirectory(v:val[1])')
   if !empty(type)
     return type[0]
   endif
@@ -37,7 +37,7 @@ endfunction "}}}
 function! s:process_diff(diff) abort "{{{
   let stats = []
   let hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
-  for line in filter(a:diff, 'v:val =~# "^@@ "')
+  for line in filter(a:diff, 'v:val =~# ''^@@ ''')
     let inserted = []
     let modified = []
     let deleted = []
@@ -138,7 +138,7 @@ function! sign_deferred#start(bufnr) abort
   else
     let stmp = &shelltemp
     try
-      let &shelltemp = !(has('win32') && has("filterpipe")) && &shelltemp
+      let &shelltemp = !(has('win32') && has('filterpipe')) && &shelltemp
       let diff = systemlist(sign_deferred#{type}#diff())
       call s:sign_diff(diff)
     finally

@@ -8,8 +8,8 @@ if exists('g:loaded_sign_deferred')
 endif
 let g:loaded_sign_deferred= 1
 
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
 
 augroup plugin-sign-deferred
@@ -41,7 +41,7 @@ if empty(maparg('[c', 'n'))
 endif
 
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
 " vim:set et:

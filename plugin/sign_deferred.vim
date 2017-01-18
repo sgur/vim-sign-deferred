@@ -15,6 +15,7 @@ set cpo&vim
 augroup plugin-sign-deferred
   autocmd!
   autocmd BufReadPre,BufWritePost * call sign_deferred#start(expand('<abuf>', 1))
+  autocmd ColorScheme *  call sign_deferred#highlight#map()
 augroup END
 
 
